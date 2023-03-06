@@ -79,7 +79,7 @@ def _check_groups(c, group):
     return groups
 
 
-def _process_groups(groups):
+def _process_groups(groups, root_dir):
     total_size = sum([len(g.projects) for g in groups])
     max_full_path_length = max([max([len(p.full_path) for p in g.projects]) for g in groups])
 
@@ -87,7 +87,7 @@ def _process_groups(groups):
         def _process_project(project):
             pbar.set_postfix(project=project.full_path.rjust(max_full_path_length, '.'), refresh=False)
 
-            repo_dir = os.path.join(root_path, project.full_path)
+            repo_dir = os.path.join(root_dir, project.full_path)
             try:
                 repo = Repo(repo_dir)
                 git = repo.git
@@ -119,4 +119,4 @@ if __name__ == '__main__':
     _check_current_user(client)
 
     print('# Progress')
-    _process_groups(_check_groups(client, group))
+    _process_groups(_check_groups(client, group), root_path)
