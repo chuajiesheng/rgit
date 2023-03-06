@@ -117,5 +117,6 @@ if __name__ == '__main__':
     client = Client(transport=transport, fetch_schema_from_transport=True)
     print('# Current User')
     _check_current_user(client)
-    
+
+    print('# Progress')
     _process_groups(_check_groups(client, group))
