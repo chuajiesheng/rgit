@@ -7,6 +7,7 @@ from git import Repo
 from git.exc import InvalidGitRepositoryError, NoSuchPathError
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
+from tqdm import tqdm
 
 QUERY = gql("""
     query ($path: ID!) {
@@ -52,7 +53,6 @@ class Group:
     projects: List[Project] = field(default_factory=list)
 
     def add_projects(self, projects):
-        print(f"## {self.name}")
         for p in projects.get('nodes'):
             self.projects.append(Project(p.get('name'), p.get('fullPath'), p.get('httpUrlToRepo')))
 
@@ -73,30 +73,36 @@ def _check_groups(c, group):
     groups = [root_group]
     for g in r.get('descendantGroups').get('nodes'):
         group = Group(g.get('fullName'), g.get('fullPath'))
-        pprint(g)
         group.add_projects(g.get('projects'))
         groups.append(group)
 
     return groups
 
 
-def _process_group(group):
-    print(f"## {g.name}")
+def _process_groups(groups):
+    total_size = sum([len(g.projects) for g in groups])
+    max_full_path_length = max([max([len(p.full_path) for p in g.projects]) for g in groups])
 
-    for p in group.projects:
-        _process_project(p)
+    with tqdm(total=total_size) as pbar:
+        def _process_project(project):
+            pbar.set_postfix(project=project.full_path.rjust(max_full_path_length, '.'), refresh=False)
 
+            repo_dir = os.path.join(root_path, project.full_path)
+            try:
+                repo = Repo(repo_dir)
+                git = repo.git
+                git.fetch('--all')
+            except (InvalidGitRepositoryError, NoSuchPathError):
+                os.makedirs(repo_dir, exist_ok=True)
+                Repo.clone_from(project.git_path, repo_dir)
 
-def _process_project(project):
-    print(f"### {project.name}")
-    repo_dir = os.path.join(root_path, project.full_path)
-    try:
-        repo = Repo(repo_dir)
-        git = repo.git
-        git.fetch('--all')
-    except (InvalidGitRepositoryError, NoSuchPathError):
-        os.makedirs(repo_dir, exist_ok=True)
-        Repo.clone_from(project.git_path, repo_dir)
+        def _process_group(group):
+            for project in group.projects:
+                _process_project(project)
+                pbar.update(1)
+
+        for g in groups:
+            _process_group(g)
 
 
 if __name__ == '__main__':
@@ -111,8 +117,5 @@ if __name__ == '__main__':
     client = Client(transport=transport, fetch_schema_from_transport=True)
     print('# Current User')
     _check_current_user(client)
-
-    print('# Groups')
-
-    for g in _check_groups(client, group):
-        _process_group(g)
+    
+    _process_groups(_check_groups(client, group))
