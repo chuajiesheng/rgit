@@ -4,7 +4,7 @@ from pprint import pprint
 from typing import List
 
 from git import Repo
-from git.exc import InvalidGitRepositoryError, NoSuchPathError
+from git.exc import InvalidGitRepositoryError, NoSuchPathError, GitCommandError
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from tqdm import tqdm
@@ -93,6 +93,9 @@ def _process_groups(groups, root_dir):
                 origin = repo.remotes.origin
                 assert origin.exists()
                 origin.fetch(kill_after_timeout=3)
+                origin.pull(rebase=True) if not repo.is_dirty() else True
+            except GitCommandError:
+                pass
             except (InvalidGitRepositoryError, NoSuchPathError):
                 os.makedirs(repo_dir, exist_ok=True)
                 Repo.clone_from(project.git_path, repo_dir)
