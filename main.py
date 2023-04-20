@@ -90,8 +90,9 @@ def _process_groups(groups, root_dir):
             repo_dir = os.path.join(root_dir, project.full_path)
             try:
                 repo = Repo(repo_dir)
-                git = repo.git
-                git.fetch('--all')
+                origin = repo.remotes.origin
+                assert origin.exists()
+                origin.fetch(kill_after_timeout=3)
             except (InvalidGitRepositoryError, NoSuchPathError):
                 os.makedirs(repo_dir, exist_ok=True)
                 Repo.clone_from(project.git_path, repo_dir)
