@@ -84,7 +84,7 @@ def _process_groups(groups, root_dir):
     max_full_path_length = max([max([len(p.full_path) for p in g.projects]) for g in groups if g.projects])
 
     with tqdm(total=total_size) as pbar:
-        def _process_project(project):
+        def _process_project(project, rescued=False):
             pbar.set_postfix(project=project.full_path.rjust(max_full_path_length, '.'), refresh=False)
 
             repo_dir = os.path.join(root_dir, project.full_path)
@@ -98,7 +98,7 @@ def _process_groups(groups, root_dir):
                 pass
             except (InvalidGitRepositoryError, NoSuchPathError):
                 os.makedirs(repo_dir, exist_ok=True)
-                Repo.clone_from(project.git_path, repo_dir)
+                _process_project(project, True) if not rescued else True
 
         def _process_group(group):
             for project in group.projects:
