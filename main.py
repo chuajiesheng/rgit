@@ -20,7 +20,7 @@ QUERY = gql("""
                         nodes {
                             name
                             fullPath
-                            httpUrlToRepo
+                            sshUrlToRepo
                             repository {
                                 empty
                                 exists
@@ -35,7 +35,7 @@ QUERY = gql("""
                 nodes {
                     name
                     fullPath
-                    httpUrlToRepo
+                    sshUrlToRepo
                     repository {
                         empty
                         exists
@@ -66,7 +66,7 @@ class Group:
             if repo.get('empty') or not repo.get('exists'):
                 continue
 
-            self.projects.append(Project(p.get('name'), p.get('fullPath'), p.get('httpUrlToRepo')))
+            self.projects.append(Project(p.get('name'), p.get('fullPath'), p.get('sshUrlToRepo')))
 
 
 def _check_current_user(c):
