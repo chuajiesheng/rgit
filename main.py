@@ -4,7 +4,7 @@ from pprint import pprint
 from typing import List
 
 from git import Repo
-from git.exc import InvalidGitRepositoryError, NoSuchPathError, GitCommandError
+from git.exc import GitCommandError
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from tqdm import tqdm
@@ -21,6 +21,10 @@ QUERY = gql("""
                             name
                             fullPath
                             httpUrlToRepo
+                            repository {
+                                empty
+                                exists
+                            }
                         }
                     }
                 }
@@ -32,6 +36,10 @@ QUERY = gql("""
                     name
                     fullPath
                     httpUrlToRepo
+                    repository {
+                        empty
+                        exists
+                    }
                 }
             }
         }
@@ -54,6 +62,10 @@ class Group:
 
     def add_projects(self, projects):
         for p in projects.get('nodes'):
+            repo = p.get('repository')
+            if repo.get('empty') or not repo.get('exists'):
+                continue
+
             self.projects.append(Project(p.get('name'), p.get('fullPath'), p.get('httpUrlToRepo')))
 
 
