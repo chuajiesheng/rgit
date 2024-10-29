@@ -136,7 +136,7 @@ if __name__ == '__main__':
     HEADERS = {'Authorization': f"Bearer {auth}"}
     transport = AIOHTTPTransport(url=url, headers=HEADERS)
 
-    client = Client(transport=transport, fetch_schema_from_transport=True)
+    client = Client(transport=transport, fetch_schema_from_transport=True, execute_timeout=20)
     print('# Current User')
     _check_current_user(client)
 
