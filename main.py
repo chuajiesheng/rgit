@@ -63,6 +63,9 @@ class Group:
     def add_projects(self, projects):
         for p in projects.get('nodes'):
             repo = p.get('repository')
+            if not repo:
+                continue
+
             if repo.get('empty') or not repo.get('exists'):
                 continue
 
