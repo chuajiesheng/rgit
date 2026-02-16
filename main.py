@@ -98,6 +98,10 @@ def _check_groups(c, group):
 
 def _process_groups(groups, root_dir):
     total_size = sum([len(g.projects) for g in groups])
+    if total_size == 0:
+        print("No projects found")
+        return
+
     max_full_path_length = max([max([len(p.full_path) for p in g.projects]) for g in groups if g.projects])
 
     with tqdm(total=total_size) as pbar:
