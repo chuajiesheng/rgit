@@ -108,7 +108,7 @@ def _process_groups(groups, root_dir):
             try:
                 origin = repo.remotes.origin
                 assert origin.exists()
-            except:
+            except (AttributeError, AssertionError):
                 origin = repo.create_remote('origin', project.git_path)
 
             try:
