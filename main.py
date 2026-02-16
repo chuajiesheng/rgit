@@ -1,6 +1,5 @@
 import os
 from dataclasses import dataclass, field
-from pprint import pprint
 from typing import List
 
 from git import Repo
@@ -75,7 +74,7 @@ class Group:
 def _check_current_user(c):
     query = gql('query {currentUser {name}}')
     result = c.execute(query)
-    pprint(result)
+    print(f"Logged in as: {result['currentUser']['name']}")
 
 
 def _check_groups(c, group):
@@ -127,8 +126,9 @@ def _process_groups(groups, root_dir):
                 if not origin.exists():
                     tqdm.write(f"[error] {project.full_path}: origin remote does not exist, skipping")
                     return
-                origin.fetch(kill_after_timeout=30)
-                origin.pull(rebase=True) if not repo.is_dirty() else True
+                origin.fetch(kill_after_timeout=30, prune=True)
+                if not repo.is_dirty():
+                    origin.pull(rebase=True)
             except (GitCommandError, ValueError) as e:
                 tqdm.write(f"[error] {project.full_path}: {e}")
 
