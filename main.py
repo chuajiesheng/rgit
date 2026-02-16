@@ -118,6 +118,10 @@ def _process_groups(groups, root_dir):
             except AttributeError:
                 tqdm.write(f"[warn] {project.full_path}: origin remote not found, creating it")
                 origin = repo.create_remote('origin', project.git_path)
+            else:
+                if origin.url != project.git_path:
+                    tqdm.write(f"[warn] {project.full_path}: updating remote URL")
+                    origin.set_url(project.git_path)
 
             try:
                 if not origin.exists():
