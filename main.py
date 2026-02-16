@@ -103,7 +103,7 @@ def _process_groups(groups, root_dir):
             pbar.set_postfix(project=project.full_path.rjust(max_full_path_length, '.'), refresh=False)
 
             repo_dir = os.path.join(root_dir, project.full_path)
-            repo = Repo.init(repo_dir) if os.path.exists(repo_dir) else Repo.clone_from(project.git_path, repo_dir)
+            repo = Repo(repo_dir) if os.path.exists(repo_dir) else Repo.clone_from(project.git_path, repo_dir)
 
             try:
                 origin = repo.remotes.origin
