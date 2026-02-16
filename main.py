@@ -110,15 +110,17 @@ def _process_groups(groups, root_dir):
                 if not origin.exists():
                     raise AttributeError
             except AttributeError:
+                tqdm.write(f"[warn] {project.full_path}: origin remote not found, creating it")
                 origin = repo.create_remote('origin', project.git_path)
 
             try:
                 if not origin.exists():
+                    tqdm.write(f"[error] {project.full_path}: origin remote does not exist, skipping")
                     return
                 origin.fetch(kill_after_timeout=30)
                 origin.pull(rebase=True) if not repo.is_dirty() else True
-            except (GitCommandError, ValueError):
-                pass
+            except (GitCommandError, ValueError) as e:
+                tqdm.write(f"[error] {project.full_path}: {e}")
 
         def _process_group(group):
             for project in group.projects:
