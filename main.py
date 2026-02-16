@@ -107,12 +107,14 @@ def _process_groups(groups, root_dir):
 
             try:
                 origin = repo.remotes.origin
-                assert origin.exists()
-            except (AttributeError, AssertionError):
+                if not origin.exists():
+                    raise AttributeError
+            except AttributeError:
                 origin = repo.create_remote('origin', project.git_path)
 
             try:
-                assert origin.exists()
+                if not origin.exists():
+                    return
                 origin.fetch(kill_after_timeout=30)
                 origin.pull(rebase=True) if not repo.is_dirty() else True
             except (GitCommandError, ValueError):
