@@ -113,9 +113,9 @@ def _process_groups(groups, root_dir):
 
             try:
                 assert origin.exists()
-                origin.fetch(kill_after_timeout=3)
+                origin.fetch(kill_after_timeout=30)
                 origin.pull(rebase=True) if not repo.is_dirty() else True
-            except GitCommandError:
+            except (GitCommandError, ValueError):
                 pass
 
         def _process_group(group):
