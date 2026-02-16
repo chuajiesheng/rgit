@@ -81,6 +81,8 @@ def _check_current_user(c):
 def _check_groups(c, group):
     params = {'path': group}
     r = c.execute(QUERY, variable_values=params).get('group')
+    if not r:
+        raise ValueError(f"Group '{group}' not found")
 
     root_group = Group(r.get('fullName'), r.get('fullPath'))
     root_group.add_projects(r.get('projects'))
