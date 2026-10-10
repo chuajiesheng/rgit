@@ -127,8 +127,11 @@ def _process_groups(groups, root_dir):
                     tqdm.write(f"[error] {project.full_path}: origin remote does not exist, skipping")
                     return
                 origin.fetch(kill_after_timeout=30, prune=True)
-                if not repo.is_dirty():
-                    origin.pull(rebase=True)
+                if repo.is_dirty():
+                    tqdm.write(f"[warn] {project.full_path}: local changes found, autostashing")
+                origin.pull(rebase=True, autostash=True)
+                if repo.git.diff(name_only=True, diff_filter='U'):
+                    tqdm.write(f"[warn] {project.full_path}: autostash conflict, resolve manually (changes kept in stash)")
             except (GitCommandError, ValueError) as e:
                 tqdm.write(f"[error] {project.full_path}: {e}")
 
